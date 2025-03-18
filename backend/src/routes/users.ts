@@ -1,13 +1,13 @@
 import { Router } from 'express';
-import { validateCreateOrderBody } from '../middlewares/validations';
-import { getCurrentUser, register, login, refreshAccessToken, logout } from '../controllers/auth';
+import { validateLoginUserBody, validateRegisterUserBody } from '../middlewares/validations';
+import { getCurrentUser, register, login , refreshAccessToken, logout } from '../controllers/auth';
 
 const router = Router();
 
-// router.post('/user', getCurrentUser);
-router.post('/register', register);
-router.post('/login', login);
-// router.post('/token', refreshAccessToken);
+router.get('/user', getCurrentUser);
+router.post('/register', validateRegisterUserBody, register);
+router.post('/login', validateLoginUserBody, login);
+router.get('/token', refreshAccessToken);
 router.get('/logout', logout);
 
 export default router;
