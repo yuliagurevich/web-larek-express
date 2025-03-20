@@ -52,7 +52,11 @@ const userSchema = new Schema<IUser>(
       required: [true, userErrorMessages.password.required],
       select: false,
     },
-    tokens: [tockenSchema],
+    tokens: {
+      type: [tockenSchema],
+      select: false,
+    } 
+    
   },
   {
     versionKey: false,
@@ -87,7 +91,7 @@ userSchema.static(
   async function findUserByCredentials(email: string, password: string) {
     try {
       // Ищем пользователя с переданным email в БД
-      const user = await this.findOne({ email }).select("+password");
+      const user = await this.findOne({ email }).select("+password").select('+tokens');
       // Пользователь с указанным email найден - сравниваем переданный пароль с сохраненным в БД
       const match = await bcrypt.compare(password, user.password);
       // Если переданный пароль не совпадает с сохраненным в БД, передаем ошибку 401 (неверные данные)

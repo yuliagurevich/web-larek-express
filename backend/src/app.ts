@@ -7,8 +7,9 @@ import cors from "cors";
 
 import cookieParser from "cookie-parser";
 
-import { port, corsOrigin, dbAddress } from "./config";
+import { port, corsOrigin, dbAddress, uploadPath } from "./config";
 import productsRouter from "./routes/products";
+import uploadRouter from "./routes/upload";
 import orderRouter from "./routes/order";
 import userRouter from "./routes/users";
 import { errorsHandler } from "./middlewares/error-handler";
@@ -31,9 +32,10 @@ mongoose.connect(dbAddress);
 app.use(requestLogger);
 
 // Рауты
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use("/auth", userRouter);
 app.use("/product", productsRouter);
+app.use("/upload", uploadRouter);
 app.use("/order", orderRouter);
 
 app.use(errorLogger);
