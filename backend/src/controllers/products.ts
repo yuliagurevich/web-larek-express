@@ -103,6 +103,7 @@ export const updateProduct = async (
 
   const options: QueryOptions = {
     returnDocument: 'after',
+    runValidators: true,
   };
 
   return Product.findByIdAndUpdate(productId, product, options)

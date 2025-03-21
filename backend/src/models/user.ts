@@ -1,6 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import { Request } from 'express';
 import bcrypt from 'bcrypt';
+import { JwtPayload } from 'jsonwebtoken';
 
 import { userErrorMessages } from '../middlewares/error-messages';
 import UnauthorizedError from '../errors/unauthorized-error';
@@ -17,7 +18,7 @@ export interface IUser {
 }
 
 export interface AuthenticatedRequest extends Request {
-  user?: IUser;
+  userId?: string | JwtPayload;
 }
 
 interface IUserModel extends mongoose.Model<IUser> {

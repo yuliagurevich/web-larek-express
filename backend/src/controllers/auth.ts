@@ -19,11 +19,24 @@ import UnauthorizedError from '../errors/unauthorized-error';
 export const getCurrentUser = async (
   req: AuthenticatedRequest,
   res: Response,
-  _next: NextFunction,
+  next: NextFunction,
 ) => {
-  const { user } = req;
+  const { userId } = req;
 
-  res.send({
+  let user;
+
+  try {
+    user = await userModel.findById(userId);
+  } catch (error) {
+    return next(error);
+  }
+
+  if (!user) {
+    // Если _id пользователь не найден 404
+    return next(new NotFoundError('Пользователь не найден'));
+  }
+
+  return res.send({
     user: {
       email: user!.email,
       name: user!.name,
