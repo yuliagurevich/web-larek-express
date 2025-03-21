@@ -1,14 +1,14 @@
-import { Request, Response, NextFunction } from "express";
-import { faker } from "@faker-js/faker";
+import { Request, Response, NextFunction } from 'express';
+import { faker } from '@faker-js/faker';
 
-import { ICreateOrder } from "middlewares/validations";
-import Product from "../models/products";
-import BadRequestError from "../errors/bad-reqest-error";
+import { ICreateOrder } from 'middlewares/validations';
+import Product from '../models/products';
+import BadRequestError from '../errors/bad-reqest-error';
 
 export const createOrder = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const orderData: ICreateOrder = req.body;
 
@@ -19,23 +19,21 @@ export const createOrder = async (
 
     if (products.length !== ids.length) {
       return next(
-        new BadRequestError("Список товаров содержит невалидный идентификатор")
+        new BadRequestError('Список товаров содержит невалидный идентификатор'),
       );
     }
 
     if (products.some((product) => product.price === null)) {
-      return next(new BadRequestError("Один или более товаров не продаются"));
+      return next(new BadRequestError('Один или более товаров не продаются'));
     }
 
-    const calculatedTotal = products.reduce((acc, product) => {
-      return acc + product.price!;
-    }, 0);
+    const calculatedTotal = products.reduce((acc, product) => acc + product.price!, 0);
 
     if (calculatedTotal !== orderData.total) {
       return next(
         new BadRequestError(
-          "Суммарная стоимость товаров не соответствует указанной сумме заказа"
-        )
+          'Суммарная стоимость товаров не соответствует указанной сумме заказа',
+        ),
       );
     }
   } catch (error) {

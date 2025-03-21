@@ -1,28 +1,28 @@
-import { NextFunction, Request, Response } from "express";
-import mongoose from "mongoose";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import { NextFunction, Request, Response } from 'express';
+import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
-import userModel, { AuthenticatedRequest } from "../models/user";
+import userModel, { AuthenticatedRequest } from '../models/user';
 import {
   accessTokenSecretKey,
   refreshTokenSecretKey,
   accessTokenLifetime,
   refreshTokenLifetime,
-} from "../config";
-import { timeToMilliseconds } from "../utils/timeUtils";
-import NotFoundError from "../errors/not-found-error";
-import BadRequestError from "../errors/bad-reqest-error";
-import ConflictError from "../errors/conflict-error";
-import UnauthorizedError from "../errors/unauthorized-error";
+} from '../config';
+import { timeToMilliseconds } from '../utils/timeUtils';
+import NotFoundError from '../errors/not-found-error';
+import BadRequestError from '../errors/bad-reqest-error';
+import ConflictError from '../errors/conflict-error';
+import UnauthorizedError from '../errors/unauthorized-error';
 
 export const getCurrentUser = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  _next: NextFunction,
 ) => {
-  const user = req.user
-  
+  const { user } = req;
+
   res.send({
     user: {
       email: user!.email,
@@ -35,14 +35,12 @@ export const getCurrentUser = async (
 export const login = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const { email, password } = req.body;
     // Ищем пользователя с переданным email в БД
     let user = await userModel.findUserByCredentials(email, password);
-
-    console.log(user);
 
     // Аутентификация успешна - генерируем пару accessToken и refreshToken,
     const accessToken = jwt.sign({ _id: user._id }, accessTokenSecretKey, {
@@ -59,15 +57,15 @@ export const login = async (
     user = await user.save();
 
     // refreshToken передаем в cookie
-    res.cookie("REFRESH_TOKEN", refreshToken, {
+    res.cookie('REFRESH_TOKEN', refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "lax",
+      sameSite: 'lax',
       maxAge: timeToMilliseconds(refreshTokenLifetime),
     });
 
     // accessToken передаем в теле ответа
-    res.status(200).send({
+    return res.status(200).send({
       user: {
         email: user.email,
         name: user.name,
@@ -84,7 +82,7 @@ export const login = async (
 export const register = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     // Извлекаем данные из тела запроса
@@ -115,15 +113,15 @@ export const register = async (
     user = await user.save();
 
     // refreshToken передаем в cookie
-    res.cookie("REFRESH_TOKEN", refreshToken, {
+    res.cookie('REFRESH_TOKEN', refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "lax",
+      sameSite: 'lax',
       maxAge: timeToMilliseconds(refreshTokenLifetime),
     });
 
     // accessToken передаем в теле ответа
-    res.status(201).send({
+    return res.status(201).send({
       user: {
         email: user.email,
         name: user.name,
@@ -147,13 +145,13 @@ export const register = async (
 export const logout = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   // Получает токен пользователя из заголовка
   const refreshToken = req.cookies.REFRESH_TOKEN;
 
   if (!refreshToken) {
-    return next(new BadRequestError("Неверные данные"));
+    return next(new BadRequestError('Неверные данные'));
   }
 
   let payload;
@@ -162,20 +160,20 @@ export const logout = async (
     payload = jwt.verify(refreshToken, refreshTokenSecretKey);
   } catch (error) {
     // Если _id полученный по токену невалиден 400
-    return next(new BadRequestError("Неверные данные"));
+    return next(new BadRequestError('Неверные данные'));
   }
 
   let user;
 
   try {
-    user = await userModel.findById(payload).select("+tokens");
+    user = await userModel.findById(payload).select('+tokens');
   } catch (error) {
     return next(error);
   }
 
   if (!user) {
     // Если _id пользователь не найден 404
-    return next(new NotFoundError("Пользователь не найден"));
+    return next(new NotFoundError('Пользователь не найден'));
   }
 
   // Удаляет из базы рефреш-токен
@@ -186,17 +184,17 @@ export const logout = async (
   const expiredRefreshToken = jwt.sign(
     { _id: user._id },
     refreshTokenSecretKey,
-    { expiresIn: 0 }
+    { expiresIn: 0 },
   );
 
-  res.cookie("REFRESH_TOKEN", expiredRefreshToken, {
+  res.cookie('REFRESH_TOKEN', expiredRefreshToken, {
     httpOnly: true,
     secure: true,
-    sameSite: "lax",
+    sameSite: 'lax',
     maxAge: 0,
   });
 
-  res.send({
+  return res.send({
     success: true,
   });
 };
@@ -204,13 +202,13 @@ export const logout = async (
 export const refreshAccessToken = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   // Получает токен пользователя из заголовка
   let refreshToken = req.cookies.REFRESH_TOKEN;
 
   if (!refreshToken) {
-    return next(new BadRequestError("Неверные данные"));
+    return next(new BadRequestError('Неверные данные'));
   }
 
   let payload;
@@ -219,22 +217,22 @@ export const refreshAccessToken = async (
     payload = jwt.verify(refreshToken, refreshTokenSecretKey);
   } catch (error) {
     // Если _id полученный по токену невалиден 401
-    return next(new UnauthorizedError("Необходима авторизация"));
+    return next(new UnauthorizedError('Необходима авторизация'));
   }
 
   let user;
 
   try {
-    user = await userModel.findById(payload).select("+tokens");
+    user = await userModel.findById(payload).select('+tokens');
   } catch (error) {
     return next(error);
   }
 
   if (!user) {
     // Если _id пользователь не найден 404
-    return next(new NotFoundError("Пользователь не найден"));
+    return next(new NotFoundError('Пользователь не найден'));
   }
-  
+
   // Генерируем пару accessToken и refreshToken на основе _id пользователя
   const accessToken = jwt.sign({ _id: user._id }, accessTokenSecretKey, {
     expiresIn: accessTokenLifetime,
@@ -250,15 +248,15 @@ export const refreshAccessToken = async (
   user = await user.save();
 
   // refreshToken передаем в cookie
-  res.cookie("REFRESH_TOKEN", refreshToken, {
+  res.cookie('REFRESH_TOKEN', refreshToken, {
     httpOnly: true,
     secure: true,
-    sameSite: "lax",
+    sameSite: 'lax',
     maxAge: timeToMilliseconds(refreshTokenLifetime),
   });
 
   // accessToken передаем в теле ответа
-  res.send({
+  return res.send({
     user: {
       email: user.email,
       name: user.name,

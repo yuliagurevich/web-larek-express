@@ -1,24 +1,22 @@
-import { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
-import { accessTokenSecretKey } from "../config";
-import userModel, { AuthenticatedRequest } from "../models/user";
-import UnauthorizedError from "../errors/unauthorized-error";
-import NotFoundError from "../errors/not-found-error";
-
-
+import { NextFunction, Response } from 'express';
+import jwt from 'jsonwebtoken';
+import { accessTokenSecretKey } from '../config';
+import userModel, { AuthenticatedRequest } from '../models/user';
+import UnauthorizedError from '../errors/unauthorized-error';
+import NotFoundError from '../errors/not-found-error';
 
 const auth = async (
   req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
+  _res: Response,
+  next: NextFunction,
 ) => {
   const { authorization } = req.headers;
 
-  if (!authorization || !authorization.startsWith("Bearer ")) {
-    return next(new UnauthorizedError("Необходима авторизация"));
+  if (!authorization || !authorization.startsWith('Bearer ')) {
+    return next(new UnauthorizedError('Необходима авторизация'));
   }
 
-  const accessToken = authorization.replace("Bearer ", "");
+  const accessToken = authorization.replace('Bearer ', '');
 
   let payload;
 
@@ -26,7 +24,7 @@ const auth = async (
     payload = jwt.verify(accessToken, accessTokenSecretKey);
   } catch (error) {
     // Если _id полученный по токену невалиден 400
-    return next(new UnauthorizedError("Необходима авторизация"));
+    return next(new UnauthorizedError('Необходима авторизация'));
   }
 
   let user;
@@ -39,12 +37,12 @@ const auth = async (
 
   if (!user) {
     // Если _id пользователь не найден 404
-    return next(new NotFoundError("Пользователь не найден"));
+    return next(new NotFoundError('Пользователь не найден'));
   }
 
   req.user = user;
 
-  next();
+  return next();
 };
 
 export default auth;

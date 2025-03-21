@@ -1,5 +1,5 @@
-import mongoose, { Schema } from "mongoose";
-import { productErrorMessages } from "../middlewares/error-messages";
+import mongoose, { Schema } from 'mongoose';
+import { productErrorMessages } from '../middlewares/error-messages';
 
 interface IImage {
   fileName: string;
@@ -47,4 +47,4 @@ const productSchema = new Schema<IProduct>({
   },
 });
 
-export default mongoose.model<IProduct>("product", productSchema);
+export default mongoose.model<IProduct>('product', productSchema);

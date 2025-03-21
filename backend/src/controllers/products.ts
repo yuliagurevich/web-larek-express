@@ -1,34 +1,32 @@
-import { Request, Response, NextFunction } from "express";
-import { Error, QueryOptions } from "mongoose";
-import path from "path";
-import fs from "fs";
-import { uploadPathTemp, uploadPath } from "../config";
-import Product, { IProduct } from "../models/products";
-import BadRequestError from "../errors/bad-reqest-error";
-import ConflictError from "../errors/conflict-error";
-import { productErrorMessages } from "../middlewares/error-messages";
+import { Request, Response, NextFunction } from 'express';
+import { Error, QueryOptions } from 'mongoose';
+import path from 'path';
+import fs from 'fs';
+import { uploadPathTemp, uploadPath } from '../config';
+import Product, { IProduct } from '../models/products';
+import BadRequestError from '../errors/bad-reqest-error';
+import ConflictError from '../errors/conflict-error';
+import { productErrorMessages } from '../middlewares/error-messages';
 
 export const getProducts = (
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
-) => {
-  return Product.find({}).then((products: IProduct[]) =>
-    res.send({
-      items: products,
-      total: products.length,
-    })
-  );
-};
+  _next: NextFunction,
+) => Product.find({}).then((products: IProduct[]) => res.send({
+  items: products,
+  total: products.length,
+}));
 
 // TODO Обработать поле image
 // TODO Обработать ошибку текстом "Ошибка валидации данных при создании товара"
 export const createProduct = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-  const { image, title, category, description, price } = req.body;
+  const {
+    image, title, category, description, price,
+  } = req.body;
   // Перенести файл картинки из временной папки в постоянную
   const tempPath = path.join(uploadPathTemp, path.basename(image.fileName));
   const permPath = path.join(uploadPath, path.basename(image.fileName));
@@ -49,33 +47,30 @@ export const createProduct = async (
     .then((product) => res.status(201).send(product))
     .catch((error: Error) => {
       if (error instanceof Error.ValidationError) {
-        console.log(error);
         return next(new BadRequestError(error.message));
       }
       if (
-        error.name === "MongoServerError" &&
-        error.message.includes("E11000") &&
-        error.message.includes("title")
+        error.name === 'MongoServerError'
+        && error.message.includes('E11000')
+        && error.message.includes('title')
       ) {
         return next(new ConflictError(productErrorMessages.title.unique));
       }
+      return next(error);
     });
 };
 
-export const findProductById = (id: string) => {
-  return Product.findById(id);
-};
+export const findProductById = (id: string) => Product.findById(id);
 
 export const uploadProductImage = (
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction,
 ) => {
-  console.log("File: ", req);
   if (!req.file) {
-    return res.status(400).json({ message: "Файл не загружен" });
+    return res.status(400).json({ message: 'Файл не загружен' });
   }
-  res.send({
+  return res.send({
     fileName: `/images/${req.file?.filename}`,
     originalName: req.file?.originalname,
   });
@@ -84,7 +79,7 @@ export const uploadProductImage = (
 export const updateProduct = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const { productId } = req.params;
   const product = req.body;
@@ -92,11 +87,11 @@ export const updateProduct = async (
   if (product.image) {
     const tempPath = path.join(
       uploadPathTemp,
-      path.basename(product.image.fileName)
+      path.basename(product.image.fileName),
     );
     const permPath = path.join(
       uploadPath,
-      path.basename(product.image.fileName)
+      path.basename(product.image.fileName),
     );
 
     try {
@@ -107,32 +102,33 @@ export const updateProduct = async (
   }
 
   const options: QueryOptions = {
-    returnDocument: "after",
+    returnDocument: 'after',
   };
 
   return Product.findByIdAndUpdate(productId, product, options)
-    .then((product) => res.status(200).send(product))
+    .then((updatedProduct) => res.status(200).send(updatedProduct))
     .catch((error: Error) => {
       if (error instanceof Error.ValidationError) {
-        console.log(error);
         return next(new BadRequestError(error.message));
       }
       if (
-        error.name === "MongoServerError" &&
-        error.message.includes("E11000") &&
-        error.message.includes("title")
+        error.name === 'MongoServerError'
+        && error.message.includes('E11000')
+        && error.message.includes('title')
       ) {
         return next(new ConflictError(productErrorMessages.title.unique));
       }
+
+      return next(error);
     });
 };
 
 export const deleteProduct = (
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction,
 ) => {
   const { productId } = req.params;
   return Product.deleteOne({ _id: productId })
-  .then((result) => res.status(200).send(result))
+    .then((result) => res.status(200).send(result));
 };
