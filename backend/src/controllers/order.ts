@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { faker } from '@faker-js/faker';
 
-import { ICreateOrder } from 'middlewares/validations';
+import { ICreateOrder } from '../middlewares/validations';
 import Product from '../models/products';
 import BadRequestError from '../errors/bad-reqest-error';
 
-export const createOrder = async (
+const createOrder = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -45,3 +45,5 @@ export const createOrder = async (
     total: orderData.total,
   });
 };
+
+export default createOrder;

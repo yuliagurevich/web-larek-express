@@ -13,7 +13,6 @@
   "author": "< Укажите здесь автора работы >",
   "license": "ISC",
   "devDependencies": {
-    "@faker-js/faker": "^9.3.0",
     "@types/bcrypt": "^5.0.2",
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
@@ -24,7 +23,6 @@
     "@types/validator": "^13.11.9",
     "@typescript-eslint/eslint-plugin": "^7.7.1",
     "@typescript-eslint/parser": "^7.7.1",
-    "dotenv": "^16.4.7",
     "eslint": "^8.56.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.29.1",
@@ -33,10 +31,12 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.6.0",
     "bcrypt": "^5.1.1",
     "celebrate": "^15.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "express": "^4.19.2",
     "express-winston": "^4.2.0",
     "jsonwebtoken": "^9.0.2",

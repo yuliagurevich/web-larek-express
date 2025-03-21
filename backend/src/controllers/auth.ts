@@ -10,7 +10,7 @@ import {
   accessTokenLifetime,
   refreshTokenLifetime,
 } from '../config';
-import { timeToMilliseconds } from '../utils/timeUtils';
+import timeToMilliseconds from '../utils/timeUtils';
 import NotFoundError from '../errors/not-found-error';
 import BadRequestError from '../errors/bad-reqest-error';
 import ConflictError from '../errors/conflict-error';

@@ -15,7 +15,7 @@ const storage: StorageEngine = multer.diskStorage({
   },
 });
 
-export const fileMiddleware = multer({
+const fileMiddleware = multer({
   storage,
   limits: { fileSize: 2 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
@@ -25,3 +25,5 @@ export const fileMiddleware = multer({
     cb(null, true);
   },
 });
+
+export default fileMiddleware;

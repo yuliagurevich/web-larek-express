@@ -5,11 +5,11 @@ import ConflictError from '../errors/conflict-error';
 import NotFoundError from '../errors/not-found-error';
 import UnauthorizedError from '../errors/unauthorized-error';
 
-export function errorsHandler(
+function errorsHandler(
   err: BadRequestError | NotFoundError | ConflictError | CelebrateError,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction,
+  _next: NextFunction,
 ) {
   let status = 0;
   let message;
@@ -36,3 +36,5 @@ export function errorsHandler(
 
   return res.status(status).send({ message });
 }
+
+export default errorsHandler;

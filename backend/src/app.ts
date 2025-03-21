@@ -14,7 +14,7 @@ import productsRouter from './routes/products';
 import uploadRouter from './routes/upload';
 import orderRouter from './routes/order';
 import userRouter from './routes/users';
-import { errorsHandler } from './middlewares/error-handler';
+import errorsHandler from './middlewares/error-handler';
 
 const app = express();
 
@@ -45,5 +45,5 @@ app.use(errorLogger);
 app.use(errorsHandler);
 
 app.listen(port, () => {
-  // console.log(`Listening on port ${port}`);
+  console.log(`Listening on port ${port}`);
 });

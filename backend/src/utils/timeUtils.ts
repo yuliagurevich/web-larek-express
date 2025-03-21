@@ -1,4 +1,4 @@
-export const timeToMilliseconds = (timeString: string): number => {
+const timeToMilliseconds = (timeString: string): number => {
   // Словарь для множителей
   const timeUnits: { [key: string]: number } = {
     m: 60 * 1000, // минута в миллисекундах
@@ -25,3 +25,5 @@ export const timeToMilliseconds = (timeString: string): number => {
 
   return value * multiplier;
 };
+
+export default timeToMilliseconds;

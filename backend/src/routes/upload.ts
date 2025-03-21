@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { fileMiddleware } from '../middlewares/file';
+import fileMiddleware from '../middlewares/file';
 import auth from '../middlewares/auth';
 import { uploadProductImage } from '../controllers/products';
 
