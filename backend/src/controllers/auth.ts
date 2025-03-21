@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
-import userModel from "../models/user";
+import userModel, { AuthenticatedRequest } from "../models/user";
 import {
   accessTokenSecretKey,
   refreshTokenSecretKey,
@@ -17,44 +17,16 @@ import ConflictError from "../errors/conflict-error";
 import UnauthorizedError from "../errors/unauthorized-error";
 
 export const getCurrentUser = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {
-  // Получить access-токен из заголовка authorization
-  const { authorization } = req.headers;
-
-  if (!authorization || !authorization.startsWith("Bearer ")) {
-    return next(new UnauthorizedError("Необходима авторизация"));
-  }
-
-  const accessToken = authorization.replace("Bearer ", "");
-
-  let payload;
-
-  try {
-    payload = jwt.verify(accessToken, accessTokenSecretKey);
-  } catch (error) {
-    // Если _id полученный по токену невалиден 400
-    return next(new UnauthorizedError("Необходима авторизация"));
-  }
-
-  let user;
-
-  try {
-    user = await userModel.findById(payload);
-  } catch (error) {
-    return next(error);
-  }
-
-  if (!user) {
-    // Если _id пользователь не найден 404
-    return next(new NotFoundError("Пользователь не найден"));
-  }
+  const user = req.user
+  
   res.send({
     user: {
-      email: user.email,
-      name: user.name,
+      email: user!.email,
+      name: user!.name,
     },
     success: true,
   });
@@ -196,7 +168,7 @@ export const logout = async (
   let user;
 
   try {
-    user = await userModel.findById(payload);
+    user = await userModel.findById(payload).select("+tokens");
   } catch (error) {
     return next(error);
   }
@@ -253,7 +225,7 @@ export const refreshAccessToken = async (
   let user;
 
   try {
-    user = await userModel.findById(payload);
+    user = await userModel.findById(payload).select("+tokens");
   } catch (error) {
     return next(error);
   }

@@ -132,7 +132,7 @@ export const validateRegisterUserBody = celebrate({
   [Segments.BODY]: registerUserSchema,
 });
 
-const loginUserSchema = Joi.object({  
+const loginUserSchema = Joi.object({
   email: Joi.string().email().required().messages({
     "string.base": userErrorMessages.email.type,
     "string.empty": userErrorMessages.email.empty,
@@ -149,4 +149,43 @@ const loginUserSchema = Joi.object({
 
 export const validateLoginUserBody = celebrate({
   [Segments.BODY]: loginUserSchema,
+});
+
+export const validateProductId = celebrate({
+  [Segments.PARAMS]: Joi.object().keys({
+    productId: Joi.string().hex().length(24).required(),
+  }),
+});
+
+const updateProductSchema = Joi.object({
+  description: Joi.string().allow("").messages({
+    "string.base": productErrorMessages.description.type,
+  }),
+  image: Joi.object({
+    fileName: Joi.string().messages({
+      "string.base": productErrorMessages.image.fileName.type,
+      "string.empty": productErrorMessages.image.fileName.empty,
+    }),
+    originalName: Joi.string().messages({
+      "string.base": productErrorMessages.image.originalName.type,
+      "string.empty": productErrorMessages.image.originalName.empty,
+    }),
+  }),
+  title: Joi.string().min(2).max(30).messages({
+    "string.base": productErrorMessages.title.type,
+    "string.empty": productErrorMessages.title.empty,
+    "string.min": productErrorMessages.title.min,
+    "string.max": productErrorMessages.title.max,
+  }),
+  category: Joi.string().messages({
+    "string.base": productErrorMessages.category.type,
+    "string.empty": productErrorMessages.category.empty,
+  }),
+  price: Joi.number().allow(null).messages({
+    "number.base": productErrorMessages.price.type,
+  }),
+});
+
+export const validateUpdateProductBody = celebrate({
+  [Segments.BODY]: updateProductSchema,
 });

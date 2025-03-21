@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { Request } from "express";
 import bcrypt from "bcrypt";
 
 import { userErrorMessages } from "../middlewares/error-messages";
@@ -8,11 +9,15 @@ interface IToken {
   token: string;
 }
 
-interface IUser {
+export interface IUser {
   name: string;
   email: string;
   password: string;
   tokens: IToken[];
+}
+
+export interface AuthenticatedRequest extends Request {
+  user?: IUser;
 }
 
 interface IUserModel extends mongoose.Model<IUser> {

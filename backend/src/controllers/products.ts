@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { Error } from "mongoose";
+import { Error, QueryOptions } from "mongoose";
 import path from "path";
 import fs from "fs";
 import { uploadPathTemp, uploadPath } from "../config";
@@ -79,4 +79,60 @@ export const uploadProductImage = (
     fileName: `/images/${req.file?.filename}`,
     originalName: req.file?.originalname,
   });
+};
+
+export const updateProduct = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { productId } = req.params;
+  const product = req.body;
+
+  if (product.image) {
+    const tempPath = path.join(
+      uploadPathTemp,
+      path.basename(product.image.fileName)
+    );
+    const permPath = path.join(
+      uploadPath,
+      path.basename(product.image.fileName)
+    );
+
+    try {
+      await fs.promises.rename(tempPath, permPath);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  const options: QueryOptions = {
+    returnDocument: "after",
+  };
+
+  return Product.findByIdAndUpdate(productId, product, options)
+    .then((product) => res.status(200).send(product))
+    .catch((error: Error) => {
+      if (error instanceof Error.ValidationError) {
+        console.log(error);
+        return next(new BadRequestError(error.message));
+      }
+      if (
+        error.name === "MongoServerError" &&
+        error.message.includes("E11000") &&
+        error.message.includes("title")
+      ) {
+        return next(new ConflictError(productErrorMessages.title.unique));
+      }
+    });
+};
+
+export const deleteProduct = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { productId } = req.params;
+  return Product.deleteOne({ _id: productId })
+  .then((result) => res.status(200).send(result))
 };
