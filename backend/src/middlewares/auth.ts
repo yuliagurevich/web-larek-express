@@ -22,7 +22,6 @@ const auth = async (
   try {
     payload = jwt.verify(accessToken, accessTokenSecretKey);
   } catch (error) {
-    // Если _id полученный по токену невалиден 400
     return next(new UnauthorizedError('Необходима авторизация'));
   }
 

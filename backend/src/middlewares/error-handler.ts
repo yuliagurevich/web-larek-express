@@ -17,16 +17,12 @@ function errorsHandler(
   if (isCelebrateError(err)) {
     status = 400;
     message = err.details.get('body')?.details[0].message;
-  } else if (err instanceof BadRequestError) {
-    status = err.statusCode;
-    message = err.message;
-  } else if (err instanceof ConflictError) {
-    status = err.statusCode;
-    message = err.message;
-  } else if (err instanceof UnauthorizedError) {
-    status = err.statusCode;
-    message = err.message;
-  } else if (err instanceof NotFoundError) {
+  } else if (
+    err instanceof BadRequestError
+    || err instanceof ConflictError
+    || err instanceof UnauthorizedError
+    || err instanceof NotFoundError
+  ) {
     status = err.statusCode;
     message = err.message;
   } else {

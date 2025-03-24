@@ -15,12 +15,20 @@ const storage: StorageEngine = multer.diskStorage({
   },
 });
 
+const allowedTypes = [
+  'image/png',
+  'image/jpg',
+  'image/jpeg',
+  'image/gif',
+  'image/svg+xml',
+];
+
 const fileMiddleware = multer({
   storage,
   limits: { fileSize: 2 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
-    if (!file.mimetype.startsWith('image/')) {
-      cb(new BadRequestError('Разрешены только изображения'));
+    if (!allowedTypes.includes(file.mimetype)) {
+      cb(new BadRequestError('Разрешены только изображения png, jpg, jpeg, gif, svg+xml'));
     }
     cb(null, true);
   },

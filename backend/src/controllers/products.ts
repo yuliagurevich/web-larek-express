@@ -11,14 +11,12 @@ import { productErrorMessages } from '../middlewares/error-messages';
 export const getProducts = (
   _req: Request,
   res: Response,
-  _next: NextFunction,
+  next: NextFunction,
 ) => Product.find({}).then((products: IProduct[]) => res.send({
   items: products,
   total: products.length,
-}));
+})).catch((error) => next(error));
 
-// TODO Обработать поле image
-// TODO Обработать ошибку текстом "Ошибка валидации данных при создании товара"
 export const createProduct = async (
   req: Request,
   res: Response,
@@ -27,7 +25,7 @@ export const createProduct = async (
   const {
     image, title, category, description, price,
   } = req.body;
-  // Перенести файл картинки из временной папки в постоянную
+
   const tempPath = path.join(uploadPathTemp, path.basename(image.fileName));
   const permPath = path.join(uploadPath, path.basename(image.fileName));
 
@@ -60,8 +58,6 @@ export const createProduct = async (
     });
 };
 
-export const findProductById = (id: string) => Product.findById(id);
-
 export const uploadProductImage = (
   req: Request,
   res: Response,
@@ -70,6 +66,7 @@ export const uploadProductImage = (
   if (!req.file) {
     return res.status(400).json({ message: 'Файл не загружен' });
   }
+
   return res.send({
     fileName: `/images/${req.file?.filename}`,
     originalName: req.file?.originalname,
@@ -127,9 +124,16 @@ export const updateProduct = async (
 export const deleteProduct = (
   req: Request,
   res: Response,
-  _next: NextFunction,
+  next: NextFunction,
 ) => {
   const { productId } = req.params;
   return Product.deleteOne({ _id: productId })
-    .then((result) => res.status(200).send(result));
+    .then((result) => res.status(200).send(result))
+    .catch((error) => {
+      if (error instanceof Error.ValidationError) {
+        return next(new BadRequestError(error.message));
+      }
+
+      return next(error);
+    });
 };

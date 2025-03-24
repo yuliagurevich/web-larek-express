@@ -73,22 +73,15 @@ userSchema.static(
   'findUserByCredentials',
   async function findUserByCredentials(email: string, password: string) {
     try {
-      // Ищем пользователя с переданным email в БД
       const user = await this.findOne({ email }).select('+password').select('+tokens');
-      // Пользователь с указанным email найден - сравниваем переданный пароль с сохраненным в БД
       const match = await bcrypt.compare(password, user.password);
-      /* Если переданный пароль не совпадает с сохраненным в БД,
-      передаем ошибку 401 (неверные данные) */
       if (!match) {
         return Promise.reject(
           new UnauthorizedError('Неверная почта или пароль'),
         );
       }
-      // Пароль совпадает с сохраненным в БД, возвращаем данные пользователя
       return Promise.resolve(user);
     } catch (error) {
-      /* Если пользователь с переданным email не зарегистрирован,
-      передаем ошибку 401 (неверные данные) */
       return Promise.reject(
         new UnauthorizedError('Неверная почта или пароль'),
       );
