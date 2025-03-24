@@ -1,7 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import path from 'path';
-// import { errors } from 'celebrate';
 import cors from 'cors';
 
 import cookieParser from 'cookie-parser';
